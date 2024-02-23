@@ -1771,14 +1771,14 @@ int dwc_otg_hicommon_probe(struct otg_dev *dev_p)
 			usb_err("dwc3_conndone_notifier_register failed\n");
 	}
 
-	ret = hw_setup(dev_p, 0);
+	ret = hw_setup(dev_p, 1);
 	if (ret) {
 		usb_err("hw setup failed!\n");
 		put_resource(dev_p);
 		return ret;
 	}
 
-	dev_p->status = OTG_DEV_DEVICE;
+	dev_p->status = OTG_DEV_HOST;
 
 	ret = create_attr_file(&pdev->dev);
 	if (ret) {
