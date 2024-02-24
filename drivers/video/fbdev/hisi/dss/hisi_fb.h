@@ -571,7 +571,9 @@ uint32_t get_panel_yres(struct hisi_fb_data_type *hisifd);
 bool is_fastboot_display_enable(void);
 bool is_dss_idle_enable(void);
 
-
+static int hisifb_setcolreg(unsigned int regno, unsigned int red,
+			     unsigned int green, unsigned int blue,
+			     unsigned int transp, struct fb_info *info);
 /* fb buffer */
 unsigned long hisifb_alloc_fb_buffer(struct hisi_fb_data_type *hisifd);
 void hisifb_free_fb_buffer(struct hisi_fb_data_type *hisifd);

@@ -12,9 +12,11 @@
  */
 
 #include "hisi_fb.h"
+#include "hisi_fb_def.h"
 #include "hisi_overlay_utils.h"
 #include <huawei_platform/log/log_jank.h>
 #include "hisi_display_effect.h"
+#include "linux/fb.h"
 #if defined (CONFIG_TEE_TUI)
 #include "tui.h"
 #endif
@@ -113,7 +115,7 @@ int g_err_status = 0;
 ** /sys/module/hisifb/parameters
 */
 /*lint -e21 -e846 -e514 -e778 -e866 -e84*/
-unsigned hisi_fb_msg_level = 7;
+unsigned hisi_fb_msg_level = 10;
 module_param_named(debug_msg_level, hisi_fb_msg_level, int, 0644);
 MODULE_PARM_DESC(debug_msg_level, "hisi fb msg level");
 
@@ -501,6 +503,9 @@ int hisi_fb_blank_sub(int blank_mode, struct fb_info *info)
 			if (ret == 0) {
 				hisifd->panel_power_on = true;
 			}
+			hisifd->backlight.bl_level_old = 0;
+			hisifd->backlight.bl_updated = 1;			
+			hisifb_set_backlight(hisifd, 200);
 		}
 		break;
 
@@ -1552,17 +1557,17 @@ static struct fb_ops hisi_fb_ops = {
 	.owner = THIS_MODULE,
 	.fb_open = hisi_fb_open,
 	.fb_release = hisi_fb_release,
-	.fb_read = NULL,
-	.fb_write = NULL,
+	.fb_read = fb_sys_read,
+	.fb_write = fb_sys_write,
 	.fb_cursor = NULL,
 	.fb_check_var = hisi_fb_check_var,
 	.fb_set_par = hisi_fb_set_par,
-	.fb_setcolreg = NULL,
+	.fb_setcolreg = hisifb_setcolreg,
 	.fb_blank = hisi_fb_blank,
 	.fb_pan_display = hisi_fb_pan_display,
-	.fb_fillrect = NULL,
-	.fb_copyarea = NULL,
-	.fb_imageblit = NULL,
+	.fb_fillrect = sys_fillrect,
+	.fb_copyarea = sys_copyarea,
+	.fb_imageblit = sys_imageblit,
 	.fb_rotate = NULL,
 	.fb_sync = NULL,
 	.fb_ioctl = hisi_fb_ioctl,
@@ -1573,6 +1578,35 @@ static struct fb_ops hisi_fb_ops = {
 	.fb_mmap = NULL,
 #endif
 };
+
+static u32 hisi_pseudo_palette[16];
+
+static inline unsigned int chan_to_field(unsigned int chan, unsigned int offset)
+{
+	chan &= 0xffff;
+	chan >>= 16 - 8; /*对应到s3c_lcd->var.red.length*/
+	// chan = 0xff - chan;
+	chan <<= offset;
+	return chan; /*对应到s3c_lcd->var.red.offset*/
+}
+
+static int hisifb_setcolreg(unsigned int regno, unsigned int red,
+			     unsigned int green, unsigned int blue,
+			     unsigned int transp, struct fb_info *info)
+{
+	unsigned int val;
+	
+	if (regno > 16)
+		return 1;
+ 
+	val  = chan_to_field(red, 16);
+	val |= chan_to_field(green, 8);
+	val |= chan_to_field(blue, 0);
+	val |= chan_to_field(transp, 24);
+	
+	hisi_pseudo_palette[regno] = val;
+	return 0;
+}
 
 #ifdef CONFIG_HISI_FB_6250
 extern int scharger_register_notifier(struct notifier_block *nb);
@@ -1889,7 +1923,7 @@ static int hisi_fb_register(struct hisi_fb_data_type *hisifd)
 	fbi->screen_base = 0;
 	fbi->fbops = &hisi_fb_ops;
 	fbi->flags = FBINFO_FLAG_DEFAULT;
-	fbi->pseudo_palette = NULL;
+	fbi->pseudo_palette = hisi_pseudo_palette;
 
 	fix->reserved[0] = is_mipi_cmd_panel(hisifd) ? 1 : 0;
 
@@ -2097,11 +2131,6 @@ static int hisi_fb_register(struct hisi_fb_data_type *hisifd)
 	hisi_display_effect_init(hisifd);
 #endif
 
-	if (register_framebuffer(fbi) < 0) {
-		HISI_FB_ERR("fb%d failed to register_framebuffer!", hisifd->index);
-		return -EPERM;
-	}
-
 	if (hisifd->sysfs_attrs_add_fnc) {
 		hisifd->sysfs_attrs_add_fnc(hisifd);
 	}
@@ -2124,12 +2153,20 @@ static int hisi_fb_register(struct hisi_fb_data_type *hisifd)
 	/* pm runtime register */
 	if (hisifd->pm_runtime_register)
 		hisifd->pm_runtime_register(hisifd->pdev);
-	/* fb sysfs create */
-	if (hisifd->sysfs_create_fnc)
-		hisifd->sysfs_create_fnc(hisifd->pdev);
 	/* lcd check esd register */
 	if (hisifd->esd_register)
 		hisifd->esd_register(hisifd->pdev);
+
+	// HISI_FB_INFO("hisi_fb_register: Before call register_framebuffer()");
+
+	if (register_framebuffer(fbi) < 0) {
+		HISI_FB_ERR("fb%d failed to register_framebuffer!", hisifd->index);
+		return -EPERM;
+	}
+
+	/* fb sysfs create */
+	if (hisifd->sysfs_create_fnc)
+		hisifd->sysfs_create_fnc(hisifd->pdev);
 
 	HISI_FB_DEBUG("FrameBuffer[%d] %dx%d size=%d bytes"
 		"is registered successfully!\n",
@@ -2459,6 +2496,11 @@ static int hisi_fb_probe(struct platform_device *pdev)
 
 	HISI_FB_DEBUG("fb%d, +.\n", hisifd->index);
 
+	pdev_list[pdev_list_cnt++] = pdev;
+
+	/* set device probe status */
+	hisi_fb_device_set_status1(hisifd);
+
 	ret = hisi_fb_register(hisifd);
 	if (ret) {
 		HISI_FB_ERR("fb%d hisi_fb_register failed, error=%d!\n", hisifd->index, ret);
@@ -2472,11 +2514,6 @@ static int hisi_fb_probe(struct platform_device *pdev)
 	hisifd->early_suspend.level = EARLY_SUSPEND_LEVEL_DISABLE_FB - 2;
 	register_early_suspend(&hisifd->early_suspend);
 #endif
-
-	pdev_list[pdev_list_cnt++] = pdev;
-
-	/* set device probe status */
-	hisi_fb_device_set_status1(hisifd);
 
 	HISI_FB_DEBUG("fb%d, -.\n", hisifd->index);
 
