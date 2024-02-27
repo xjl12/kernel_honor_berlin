@@ -60,6 +60,7 @@ static DEFINE_PER_CPU(struct kvm_vcpu *, kvm_arm_running_vcpu);
 /* The VMID used in the VTTBR */
 static atomic64_t kvm_vmid_gen = ATOMIC64_INIT(1);
 static u8 kvm_next_vmid;
+static unsigned int kvm_vmid_bits __read_mostly;
 static DEFINE_SPINLOCK(kvm_vmid_lock);
 
 static bool vgic_present;
@@ -1087,7 +1088,7 @@ static int init_vhe_mode(void)
 	on_each_cpu(cpu_init_stage2, NULL, 1);
 
 	/* set size of VMID supported by CPU */
-	kvm_vmid_bits = kvm_get_vmid_bits();
+	kvm_vmid_bits = 8;
 	kvm_info("%d-bit VMID\n", kvm_vmid_bits);
 
 	kvm_info("VHE mode initialized successfully\n");

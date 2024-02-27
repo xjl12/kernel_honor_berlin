@@ -231,7 +231,7 @@ static inline bool vcpu_has_cache_enabled(struct kvm_vcpu *vcpu)
 {
 	return (vcpu_sys_reg(vcpu, SCTLR_EL1) & 0b101) == 0b101;
 }
-
+#include <linux/kvm_types.h>
 static inline void __coherent_cache_guest_page(struct kvm_vcpu *vcpu, pfn_t pfn,
 					       unsigned long size,
 					       bool ipa_uncached)
