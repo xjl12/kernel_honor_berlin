@@ -19,6 +19,7 @@ TARGETS += user
 TARGETS += jumplabel
 TARGETS += vm
 TARGETS += x86
+TARGETS += rseq
 #Please keep the TARGETS list alphabetically sorted
 
 TARGETS_HOTPLUG = cpu-hotplug

@@ -185,7 +185,11 @@ static inline int valid_user_regs(struct user_pt_regs *regs)
 #define stack_pointer(regs)		((regs)->sp)
 
 extern unsigned long profile_pc(struct pt_regs *regs);
-
+static inline void instruction_pointer_set(struct pt_regs *regs,
+					   unsigned long val)
+{
+	instruction_pointer(regs) = val;
+}
 
 #ifdef CONFIG_HISI_BB
 /*

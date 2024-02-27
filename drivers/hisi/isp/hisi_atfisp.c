@@ -659,23 +659,23 @@ static int atfisp_loadrsctable(void)
 
 static int atfisp_loadfw(void)
 {
-    struct hisi_atfisp_s *dev = (struct hisi_atfisp_s *)&atfisp_dev;
-    struct load_image_info loadinfo;
-	int ret = 0;
+    // struct hisi_atfisp_s *dev = (struct hisi_atfisp_s *)&atfisp_dev;
+    // struct load_image_info loadinfo;
+	// int ret = 0;
 
-    loadinfo.ecoretype      = ISP;
-	loadinfo.image_addr     = loadimg[ISPIMG_FW].addr;
-	loadinfo.image_size     = loadimg[ISPIMG_FW].size;
-	loadinfo.partion_name   = loadimg[ISPIMG_FW].partition;
-	pr_info("[%s] + %s.(0x%lx, 0x%x), init.%x\n", __func__, loadinfo.partion_name, loadinfo.image_addr, loadinfo.image_size, dev->ispops->refs_fw);
-    if ((ret = bsp_load_and_verify_image(&loadinfo)) < 0) {
-	    pr_err("[%s] Failed : bsp_load_and_verify_image.%d, %s.(0x%lx, 0x%x)\n", __func__, ret, loadinfo.partion_name, loadinfo.image_addr, loadinfo.image_size);
-	    return ret;
-	}
+    // loadinfo.ecoretype      = ISP;
+	// loadinfo.image_addr     = loadimg[ISPIMG_FW].addr;
+	// loadinfo.image_size     = loadimg[ISPIMG_FW].size;
+	// loadinfo.partion_name   = loadimg[ISPIMG_FW].partition;
+	// pr_info("[%s] + %s.(0x%lx, 0x%x), init.%x\n", __func__, loadinfo.partion_name, loadinfo.image_addr, loadinfo.image_size, dev->ispops->refs_fw);
+    // if ((ret = bsp_load_and_verify_image(&loadinfo)) < 0) {
+	//     pr_err("[%s] Failed : bsp_load_and_verify_image.%d, %s.(0x%lx, 0x%x)\n", __func__, ret, loadinfo.partion_name, loadinfo.image_addr, loadinfo.image_size);
+	//     return ret;
+	// }
 
-    dev->ispops->refs_fw++;
+    // dev->ispops->refs_fw++;
 
-    pr_info("[%s] - bsp_load_and_verify_image.%d, %s.(0x%lx, 0x%x), init.%x\n", __func__, ret, loadinfo.partion_name, loadinfo.image_addr, loadinfo.image_size, dev->ispops->refs_fw);
+    // pr_info("[%s] - bsp_load_and_verify_image.%d, %s.(0x%lx, 0x%x), init.%x\n", __func__, ret, loadinfo.partion_name, loadinfo.image_addr, loadinfo.image_size, dev->ispops->refs_fw);
 
 	return 0;
 }

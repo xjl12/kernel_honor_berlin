@@ -19,6 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "asm/kvm_mmu.h"
 #include <linux/errno.h>
 #include <linux/kvm_host.h>
 #include <linux/kvm.h>
@@ -28,6 +29,7 @@
 #include <asm/cputype.h>
 #include <asm/ptrace.h>
 #include <asm/kvm_arm.h>
+#include <asm/kvm_asm.h>
 #include <asm/kvm_coproc.h>
 
 /*
@@ -109,6 +111,9 @@ int kvm_reset_vcpu(struct kvm_vcpu *vcpu)
 
 	return 0;
 }
+
+extern char __hyp_idmap_text_start[];
+
 unsigned long kvm_hyp_reset_entry(void)
  {
        if (!__kvm_cpu_uses_extended_idmap()) {

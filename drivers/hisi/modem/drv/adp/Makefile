@@ -14,7 +14,9 @@ KBUILD_CPPFLAGS += -Idrivers/hisi/modem/drv/mem
 KBUILD_CPPFLAGS += -Idrivers/hisi/modem/drv/om \
                    -Idrivers/hisi/modem/drv/om/common \
                    -Idrivers/hisi/modem/drv/om/dump \
-                   -Idrivers/hisi/modem/drv/om/log 
+                   -Idrivers/hisi/modem/drv/om/log \
+		   -Idrivers/hisi/modem/drv/common/include \
+		   -Idrivers/hisi/modem/config/product/hi6250/config
 KBUILD_CPPFLAGS += -Idrivers/hisi/modem/drv/udi
 KBUILD_CPPFLAGS += -Idrivers/hisi/modem/drv/balong_timer
 KBUILD_CPPFLAGS += -Idrivers/hisi/modem/drv/hds

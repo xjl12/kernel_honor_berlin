@@ -1274,6 +1274,7 @@ void set_task_cpu(struct task_struct *p, unsigned int new_cpu)
 		if (p->sched_class->migrate_task_rq)
 			p->sched_class->migrate_task_rq(p, new_cpu);
 		p->se.nr_migrations++;
+		rseq_migrate(p);
 		perf_sw_event_sched(PERF_COUNT_SW_CPU_MIGRATIONS, 1, 0);
 
 		walt_fixup_busy_time(p, new_cpu);
@@ -2221,6 +2222,7 @@ int sched_fork(unsigned long clone_flags, struct task_struct *p)
 	 * Silence PROVE_RCU.
 	 */
 	raw_spin_lock_irqsave(&p->pi_lock, flags);
+	rseq_migrate(p);
 	set_task_cpu(p, cpu);
 	raw_spin_unlock_irqrestore(&p->pi_lock, flags);
 
@@ -2381,6 +2383,7 @@ void wake_up_new_task(struct task_struct *p)
 	 *  - cpus_allowed can change in the fork path
 	 *  - any previously selected cpu might disappear through hotplug
 	 */
+	rseq_migrate(p);
 	set_task_cpu(p, select_task_rq(p, task_cpu(p), SD_BALANCE_FORK, 0));
 #endif
 
@@ -2473,6 +2476,7 @@ prepare_task_switch(struct rq *rq, struct task_struct *prev,
 	trace_sched_switch(prev, next);
 	sched_info_switch(rq, prev, next);
 	perf_event_task_sched_out(prev, next);
+	rseq_preempt(prev);
 	fire_sched_out_preempt_notifiers(prev, next);
 	prepare_lock_switch(rq, next);
 	prepare_arch_switch(next);

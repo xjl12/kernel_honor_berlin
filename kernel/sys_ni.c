@@ -243,3 +243,6 @@ cond_syscall(sys_bpf);
 
 /* execveat */
 cond_syscall(sys_execveat);
+
+/* restartable sequence */
+cond_syscall(sys_rseq);

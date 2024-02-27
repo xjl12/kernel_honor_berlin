@@ -1584,7 +1584,9 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 	 * Copy seccomp details explicitly here, in case they were changed
 	 * before holding sighand lock.
 	 */
-	copy_seccomp(p);
+    copy_seccomp(p);
+        
+	rseq_fork(p, clone_flags);
 
 	/*
 	 * Process group and session signals need to be delivered to just the
