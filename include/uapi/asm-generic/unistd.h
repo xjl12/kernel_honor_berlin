@@ -711,9 +711,10 @@ __SYSCALL(__NR_bpf, sys_bpf)
 __SC_COMP(__NR_execveat, sys_execveat, compat_sys_execveat)
 #define __NR_rseq 293
 __SYSCALL(__NR_rseq, sys_rseq)
-
+#define __NR_faccessat2 439
+__SYSCALL(__NR_faccessat2, sys_faccessat2)
 #undef __NR_syscalls
-#define __NR_syscalls 294
+#define __NR_syscalls 440
 
 /*
  * All syscalls below here should go away really,

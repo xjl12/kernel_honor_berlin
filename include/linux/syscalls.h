@@ -884,6 +884,8 @@ asmlinkage long sys_bpf(int cmd, union bpf_attr *attr, unsigned int size);
 asmlinkage long sys_execveat(int dfd, const char __user *filename,
 			const char __user *const __user *argv,
 			const char __user *const __user *envp, int flags);
-asmlinkage long sys_rseq(struct rseq __user *rseq, uint32_t rseq_len,
-			 int flags, uint32_t sig);
+asmlinkage long sys_rseq(struct rseq __user *rseq, uint32_t rseq_len, int flags,
+                         uint32_t sig);
+asmlinkage long sys_faccessat2(int dfd, const char __user *filename, int mode,
+			       int flags);
 #endif

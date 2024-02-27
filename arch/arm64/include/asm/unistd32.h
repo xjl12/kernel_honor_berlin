@@ -799,3 +799,5 @@ __SYSCALL(__NR_bpf, sys_bpf)
 __SYSCALL(__NR_execveat, compat_sys_execveat)
 #define __NR_rseq 398
 __SYSCALL(__NR_rseq, sys_rseq)
+#define __NR_faccessat2 439
+__SYSCALL(__NR_faccessat2, sys_faccessat2)
