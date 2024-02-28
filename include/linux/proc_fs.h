@@ -86,4 +86,6 @@ static inline struct proc_dir_entry *proc_net_mkdir(
 	return proc_mkdir_data(name, 0, parent, net);
 }
 
+bool proc_ns_file(const struct file *file);
+
 #endif /* _LINUX_PROC_FS_H */

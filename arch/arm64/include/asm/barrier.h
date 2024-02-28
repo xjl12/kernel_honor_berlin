@@ -64,27 +64,32 @@ do {									\
 
 #define smp_load_acquire(p)						\
 ({									\
-	typeof(*p) ___p1;						\
+	union { __unqual_scalar_typeof(*p) __val; char __c[1]; } __u;	\
+	typeof(p) __p = (p);						\
 	compiletime_assert_atomic_type(*p);				\
 	switch (sizeof(*p)) {						\
 	case 1:								\
 		asm volatile ("ldarb %w0, %1"				\
-			: "=r" (___p1) : "Q" (*p) : "memory");		\
+			: "=r" (*(__u8 *)__u.__c)			\
+			: "Q" (*__p) : "memory");			\
 		break;							\
 	case 2:								\
 		asm volatile ("ldarh %w0, %1"				\
-			: "=r" (___p1) : "Q" (*p) : "memory");		\
+			: "=r" (*(__u16 *)__u.__c)			\
+			: "Q" (*__p) : "memory");			\
 		break;							\
 	case 4:								\
 		asm volatile ("ldar %w0, %1"				\
-			: "=r" (___p1) : "Q" (*p) : "memory");		\
+			: "=r" (*(__u32 *)__u.__c)			\
+			: "Q" (*__p) : "memory");			\
 		break;							\
 	case 8:								\
 		asm volatile ("ldar %0, %1"				\
-			: "=r" (___p1) : "Q" (*p) : "memory");		\
+			: "=r" (*(__u64 *)__u.__c)			\
+			: "Q" (*__p) : "memory");			\
 		break;							\
 	}								\
-	___p1;								\
+	(typeof(*p))__u.__val;						\
 })
 
 #define read_barrier_depends()		do { } while(0)

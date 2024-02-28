@@ -713,8 +713,10 @@ __SC_COMP(__NR_execveat, sys_execveat, compat_sys_execveat)
 __SYSCALL(__NR_rseq, sys_rseq)
 #define __NR_faccessat2 439
 __SYSCALL(__NR_faccessat2, sys_faccessat2)
+#define __NR_mount_setattr 442
+__SYSCALL(__NR_mount_setattr, sys_mount_setattr)
 #undef __NR_syscalls
-#define __NR_syscalls 440
+#define __NR_syscalls 443
 
 /*
  * All syscalls below here should go away really,

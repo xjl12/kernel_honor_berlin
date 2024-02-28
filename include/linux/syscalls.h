@@ -887,5 +887,8 @@ asmlinkage long sys_execveat(int dfd, const char __user *filename,
 asmlinkage long sys_rseq(struct rseq __user *rseq, uint32_t rseq_len, int flags,
                          uint32_t sig);
 asmlinkage long sys_faccessat2(int dfd, const char __user *filename, int mode,
-			       int flags);
+                               int flags);
+asmlinkage long sys_mount_setattr(int dfd, const char __user *path,
+				  unsigned int flags,
+				  struct mount_attr __user *uattr, size_t usize);
 #endif

@@ -13,6 +13,13 @@
 #define BITS_TO_LONGS(nr)	DIV_ROUND_UP(nr, BITS_PER_BYTE * sizeof(long))
 #endif
 
+/* Set bits in the first 'n' bytes when loaded from memory */
+#ifdef __LITTLE_ENDIAN
+#  define aligned_byte_mask(n) ((1ul << 8*(n))-1)
+#else
+#  define aligned_byte_mask(n) (~0xfful << (BITS_PER_LONG - 8 - 8*(n)))
+#endif
+
 /*
  * Create a contiguous bitmask starting at bit position @l and ending at
  * position @h. For example
