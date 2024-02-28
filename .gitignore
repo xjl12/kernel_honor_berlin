@@ -1,4 +1,5 @@
 out
+uefi
 stock
 .cache
 compile_commands.json
